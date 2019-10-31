@@ -8,7 +8,7 @@
 #include<sstream>
 #include<unordered_map>
 #include<boost/filesystem.hpp>
-#include<boost/algorithm/string.hpp>//ÇĞ¸î×Ö·û´®Í·ÎÄ¼ş
+#include<boost/algorithm/string.hpp>     //åˆ‡å‰²å­—ç¬¦ä¸²å¤´æ–‡ä»¶
 #include"httplib.h"
 
 #define CLIENT_BACKUP_DIR "backup"
@@ -22,7 +22,7 @@ namespace bf = boost::filesystem;
 
 class ThrBackUp
 {
-	//Ê¹ÓÃÏß³Ì±¸·İÎÄ¼ş
+	//ä½¿ç”¨çº¿ç¨‹å¤‡ä»½æ–‡ä»¶
 private:
 	std::string _file;
 	int64_t _range_start;
@@ -35,7 +35,7 @@ public:
 	{}
 	void Start()
 	{
-		//»ñÈ¡ÎÄ¼şµÄrange·Ö¿éÊı¾İ
+		//è·å–æ–‡ä»¶çš„rangeåˆ†å—æ•°æ®
 		std::ifstream path(_file, std::ios::binary);
 		if (!path.is_open())
 		{
@@ -43,11 +43,11 @@ public:
 			_res = false;
 			return;
 		}
-		//Ìø×ªµ½rangeµÄÆğÊ¼Î»ÖÃ
+		//è·³è½¬åˆ°rangeçš„èµ·å§‹ä½ç½®
 		path.seekg(_range_start, std::ios::beg);
 		std::string body;
 		body.resize(_range_len);
-		//¶ÁÈ¡ÎÄ¼şÖĞrange·Ö¿éµÄÎÄ¼şÊı¾İ
+		//è¯»å–æ–‡ä»¶ä¸­rangeåˆ†å—çš„æ–‡ä»¶æ•°æ®
 		path.read(&body[0], _range_len);
 		if (!path.good())
 		{
@@ -57,20 +57,20 @@ public:
 		}
 		path.close();
 
-		//ÉÏ´«rangeÊı¾İ
+		//ä¸Šä¼ rangeæ•°æ®
 		bf::path name(_file);
-		//×éÖ¯ÉÏ´«µÄurlÂ·¾¶  method URL version
+		//ç»„ç»‡ä¸Šä¼ çš„urlè·¯å¾„  method URL version
 		//PUT /list/filename HTTP/1.1
 		std::string uri = BACKUP_URI + name.filename().string();
-		//ÊµÀı»¯Ò»¸öhttpÀû±×µÄ¿Í»§¶Ë¶ÔÏó
+		//å®ä¾‹åŒ–ä¸€ä¸ªhttpåˆ©å¼Šçš„å®¢æˆ·ç«¯å¯¹è±¡
 		httplib::Client cli(SERVER_IP, SERVER_PORT);
-		//¶¨ÒåhttpÇëÇóÍ·ĞÅÏ¢
+		//å®šä¹‰httpè¯·æ±‚å¤´ä¿¡æ¯
 		httplib::Headers hdr;
 		hdr.insert(std::make_pair("Content-Length", std::to_string(_range_len)));
 		std::stringstream tmp;
 		tmp << "bytes=" << _range_start << "-" << (_range_start + _range_len - 1);
-		hdr.insert(std::make_pair("Range", tmp.str().c_str()));//tmp.str()»ñÈ¡stringstreamµÄstring¶ÔÏó
-		//Í¨¹ıÊµÀı»¯µÄClientÏò·şÎñÆ÷·¢ËÍPUTÇëÇó
+		hdr.insert(std::make_pair("Range", tmp.str().c_str()));//tmp.str()è·å–stringstreamçš„stringå¯¹è±¡
+		//é€šè¿‡å®ä¾‹åŒ–çš„Clientå‘æœåŠ¡å™¨å‘é€PUTè¯·æ±‚
 		auto rsp = cli.Put(uri.c_str(), hdr, body, "text/plain");
 		if (rsp && rsp->status != 200)
 		{
@@ -112,7 +112,7 @@ private:
 			std::cerr << "list file open error\n";
 			return false;
 		}
-		file.read(&body[0], fsize);//¶ÁÈ¡Êı¾İ
+		file.read(&body[0], fsize);//è¯»å–æ•°æ®
 		if (!file.good())
 		{
 			std::cerr << "read list file body error\n";
@@ -167,7 +167,7 @@ private:
 		{
 			if (bf::is_directory(item_begin->status()))
 			{
-				//ÅĞ¶ÏÊÇ·ñÊÇÄ¿Â¼
+				//åˆ¤æ–­æ˜¯å¦æ˜¯ç›®å½•
 				BackupDirListen(item_begin->path().string());
 				continue;
 			}
@@ -199,18 +199,18 @@ private:
 
 	bool PutFileData(const std::string &file)
 	{
-		//10M°´´óĞ¡¶ÔÎÄ¼ş½øĞĞ·Ö¿é´«Êä
-		//Í¨¹ı»ñÈ¡·Ö¿é´«ÊäÊÇ·ñ³É¹¦ÅĞ¶ÏÕû¸öÎÄ¼şÊÇ·ñ´«Êä³É¹¦
-		//Ñ¡Ôñ¶àÏß³Ì½â¾ö
-		//1.»ñÈ¡ÎÄ¼ş´óĞ¡
+		//10MæŒ‰å¤§å°å¯¹æ–‡ä»¶è¿›è¡Œåˆ†å—ä¼ è¾“
+		//é€šè¿‡è·å–åˆ†å—ä¼ è¾“æ˜¯å¦æˆåŠŸåˆ¤æ–­æ•´ä¸ªæ–‡ä»¶æ˜¯å¦ä¼ è¾“æˆåŠŸ
+		//é€‰æ‹©å¤šçº¿ç¨‹è§£å†³
+		//1.è·å–æ–‡ä»¶å¤§å°
 		int64_t fsize = bf::file_size(file);
 		if (fsize <= 0)
 		{
 			std::cerr << "file" << file << "unecessary backup\n";
 			return false;
 		}
-		//2.¼ÆËãĞèÒª·Ö¶àÉÙ¿é£¬µÃµ½Ã¿¿é´óĞ¡ÒÔ¼°ÆğÊ¼Î»ÖÃ
-		//3.Ñ­»·´´½¨Ïß³Ì£¬ÔÚÏß³ÌÖĞÉÏ´«ÎÄ¼şÊı¾İ
+		//2.è®¡ç®—éœ€è¦åˆ†å¤šå°‘å—ï¼Œå¾—åˆ°æ¯å—å¤§å°ä»¥åŠèµ·å§‹ä½ç½®
+		//3.å¾ªç¯åˆ›å»ºçº¿ç¨‹ï¼Œåœ¨çº¿ç¨‹ä¸­ä¸Šä¼ æ–‡ä»¶æ•°æ®
 		int count = (int) (fsize / RANGE_MAX_SIZE);
 		std::vector<ThrBackUp> thr_res;
 		std::vector<std::thread> thr_list;
@@ -235,7 +235,7 @@ private:
 			thr_list.push_back(std::thread(thr_start, &thr_res[i]));
 		}
 
-		//4.µÈ´ıËùÓĞÏß³ÌÍË³ö£¬ÅĞ¶ÏÎÄ¼şÉÏ´«½á¹û
+		//4.ç­‰å¾…æ‰€æœ‰çº¿ç¨‹é€€å‡ºï¼Œåˆ¤æ–­æ–‡ä»¶ä¸Šä¼ ç»“æœ
 		bool ret = true;
 		for (int i = 0; i <= count; ++i)
 		{
@@ -246,13 +246,13 @@ private:
 			}
 			ret = false;
 		}
-		//5.ÉÏ´«ÎÄ¼ş³É¹¦£¬ÔòÌí¼ÓÎÄ¼şµÄ±¸·İĞÅÏ¢¼ÇÂ¼
+		//5.ä¸Šä¼ æ–‡ä»¶æˆåŠŸï¼Œåˆ™æ·»åŠ æ–‡ä»¶çš„å¤‡ä»½ä¿¡æ¯è®°å½•
 		if (ret == false)
 		{
 			return false;
 		}
 		std::cerr << "file:[" << file << "] backup success\n";
-		//´Ë´¦ÓĞÓÅ»¯£¬·Ö¿é´«ÊäÊ§°ÜÊ±£¬²»±ØÈ«²¿ÖØ´«£¬¿ÉÒÔÖØ´«Ê§°ÜµÄ·Ö¿é
+		//æ­¤å¤„æœ‰ä¼˜åŒ–ï¼Œåˆ†å—ä¼ è¾“å¤±è´¥æ—¶ï¼Œä¸å¿…å…¨éƒ¨é‡ä¼ ï¼Œå¯ä»¥é‡ä¼ å¤±è´¥çš„åˆ†å—
 		return true;
 	}
 
@@ -270,9 +270,9 @@ private:
 			std::cerr << "get file" << file << "error\n";
 			return false;
 		}
-		//ÎÄ¼şµÄ´óĞ¡
+		//æ–‡ä»¶çš„å¤§å°
 		int64_t fsize = bf::file_size(path);
-		//×î½üÒ»´Î·ÃÎÊÎÄ¼şµÄÊ±¼ä
+		//æœ€è¿‘ä¸€æ¬¡è®¿é—®æ–‡ä»¶çš„æ—¶é—´
 		int64_t mtime = bf::last_write_time(path);
 		std::stringstream tmp;
 		tmp << std::hex << fsize << "-" << std::hex << mtime;
